@@ -5,7 +5,9 @@
 
 
 struct list *alloc_cell(void)
-/* リストの要素を確保 */
+/*!
+	リストの要素を確保
+*/
 {
 	struct list *cell;
 
@@ -22,7 +24,10 @@ struct list *alloc_cell(void)
 }
 
 void delete_cell(struct list *cell)
-/* リストの要素を削除 */
+/*!
+	リストの要素を削除
+	@param cell 削除対象のリスト要素
+*/
 {
 	cell->prev->next = cell->next;
 	cell->next->prev = cell->prev;
@@ -31,7 +36,9 @@ void delete_cell(struct list *cell)
 }
 
 struct list *init_list(void)
-/* リストを初期化 */
+/*!
+	リストを初期化
+*/
 {
 	struct list *head;
 
@@ -41,7 +48,12 @@ struct list *init_list(void)
 }
 
 void push_stack(struct list *head, void *data, size_t size_data)
-/* スタックに要素を挿入 */
+/*!
+	スタックに要素を挿入
+	@param head リストの先頭
+	@param data 挿入するデータ
+	@param size_data 挿入するデータのサイズ
+*/
 {
 	struct list *new;
 
@@ -63,17 +75,27 @@ void push_stack(struct list *head, void *data, size_t size_data)
 }
 
 void push_queue(struct list *head, void *data, size_t size_data)
-/* キューに要素を挿入 */
+/*!
+	キューに要素を挿入
+	@param head リストの先頭
+	@param data 挿入するデータ
+	@param size_data 挿入するデータのサイズ
+*/
 {
 	push_stack(head, data, size_data); /* スタックへの挿入と同じ操作 */
 }
 
 void pop_stack(struct list *head, void *data, size_t size_data)
-/* スタックから要素を取り出し */
+/*!
+	スタックから要素を取り出し
+	@param head リストの先頭
+	@param data 取り出すデータを格納するバッファ
+	@param size_data 取り出すデータのサイズ
+*/
 {
 	struct list *target;
 
-	if (head->next == head || head->prev == head) {
+	if (head->next == head) {
 		fprintf(stderr, "ERROR: No data in the stack.\n");
 		return;
 	}
@@ -87,14 +109,20 @@ void pop_stack(struct list *head, void *data, size_t size_data)
 }
 
 void pop_queue(struct list *head, void *data, size_t size_data)
-/* キューから要素を取り出し */
+/*!
+	キューから要素を取り出し
+	@param head リストの先頭
+	@param data 取り出すデータを格納するバッファ
+	@param size_data 取り出すデータのサイズ
+*/
 {
 	struct list *target;
 
-	if (head->next == head || head->prev == head) {
+	if (head->next == head) {
 		fprintf(stderr, "ERROR: No data in the queue.\n");
 		return;
 	}
+
 	/* head の直前の要素を取り出す */
 	target = head->prev;
 	memcpy(data, target->data, size_data);
@@ -103,26 +131,64 @@ void pop_queue(struct list *head, void *data, size_t size_data)
 	(head->size)--;
 }
 
+void swap_cell(struct list *cell1, struct list *cell2)
+/*!
+	要素を交換
+	@param cell1 交換する要素1
+	@param cell2 交換する要素2
+*/
+{
+	void *tmp_data;
+	size_t tmp_size;
+
+	if (cell1 == cell2)
+		return;
+
+	tmp_data = cell1->data;
+	tmp_size = cell1->size;
+
+	cell1->data = cell2->data;
+	cell1->size = cell2->size;
+
+	cell2->data = tmp_data;
+	cell2->size = tmp_size;
+}
+
 size_t size_next_stack(struct list *head)
-/* スタックの最上部にあるデータのサイズを返す */
+/*!
+	スタックの最上部にあるデータのサイズを返す
+	@param head リストの先頭
+*/
 {
 	return head->next->size;
 }
 
 size_t size_next_queue(struct list *head)
-/* キューの出口にあるデータのサイズを返す */
+/*!
+	キューの出口にあるデータのサイズを返す
+	@param head リストの先頭
+*/
 {
 	return head->prev->size;
 }
 
 size_t size_list(struct list *head)
-/* リストの要素数を返す */
+/*!
+	リストの要素数を返す
+	@param head リストの先頭
+*/
 {
 	return head->size;
 }
 
+
 struct list *search_list(struct list *head, void *data, size_t size_data)
-/* リストから検索 */
+/*!
+	リストから検索
+	@param head リストの先頭
+	@param data 検索したいデータ
+	@param size_data データのサイズ
+*/
 {
 	struct list *p;
 
@@ -134,7 +200,10 @@ struct list *search_list(struct list *head, void *data, size_t size_data)
 }
 
 void delete_list(struct list *head)
-/* リストの全要素を削除 */
+/*!
+	リスト全体を削除
+	@param head リストの先頭
+*/
 {
 	struct list *target;
 
@@ -147,9 +216,15 @@ void delete_list(struct list *head)
 
 
 char **tokenize_str(char *str, char *delim, int *num_token)
-/* 文字列を指定のデリミタで区切り、トークンに分割する */
+/*!
+	文字列を指定のデリミタで区切り、トークンに分割する
+	@param str 対象文字列
+	@param delim デリミタ
+	@param num_token 切り出されたトークンの数
+*/
 {
-	char *p;
+	char *b, *e;
+	char *buf;
 	char **token_ary;
 	int i;
 	size_t len_token;
@@ -157,20 +232,22 @@ char **tokenize_str(char *str, char *delim, int *num_token)
 
 	head = init_list();
 	*num_token = 0;
-	do {
-		if (*num_token == 0)
-			p = strtok(str, delim);
-		else
-			p = strtok(NULL, delim);
-		if (p != NULL) {
-			push_queue(head, p, strlen(p) + 1); /* +1 は \0 のため */
-			(*num_token)++;
-		}
-	} while (p != NULL);
-
-	if (*num_token == 0) {
-		delete_list(head);
-		return NULL;
+	for (b = e = str + strspn(str, delim); *e != '\0'; ) {
+		/* トークンの先頭・終端をセット */
+		if (*num_token != 0)
+			b += strcspn(b, delim);
+		b += strspn(b, delim);
+		e = b + strcspn(b, delim);
+		(*num_token)++;
+		/* トークンを処理 */
+		len_token = e - b;
+		buf = (char *) malloc(sizeof(char) * (len_token + 1));
+		strncpy(buf, b, len_token);
+		buf[len_token] = '\0';
+		push_queue(head, buf, len_token + 1);
+		free(buf);
+		/* 文字列終端までのトークンの有無を検知 */
+		e += strspn(e, delim);
 	}
 
 	token_ary = (char **) malloc(sizeof(char *) * (*num_token));
@@ -193,7 +270,11 @@ char **tokenize_str(char *str, char *delim, int *num_token)
 }
 
 void free_token_ary(char **token_ary, int num_token)
-/* トークン格納用配列を解放 */
+/*!
+	トークン格納用配列を解放
+	@param token_ary トークン格納用配列
+	@param num_token token_ary の要素数
+*/
 {
 	int i;
 
@@ -204,3 +285,22 @@ void free_token_ary(char **token_ary, int num_token)
 		free(token_ary[i]);
 	free(token_ary);
 }
+
+void bubble_sort_list(struct list *head, int(*cmp)(const void *d0, const void *d1))
+/*!
+	リスト内の要素を比較関数に従ってソートする (バブルソート)
+	@param head リストの先頭
+	@param cmp 比較関数へのポインタ
+*/
+{
+	struct list *p0, *p1;
+
+	for (p0 = head->next; p0 != head; p0 = p0->next) {
+		for (p1 = head->prev; p1 != p0; p1 = p1->prev) {
+			if (cmp((p1->prev)->data, p1->data) > 0) {
+				swap_cell(p1->prev, p1);
+			}
+		}
+	}
+}
+
