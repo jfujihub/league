@@ -40,11 +40,7 @@ struct list *init_list(void)
 	リストを初期化
 */
 {
-	struct list *head;
-
-	head = alloc_cell();
-
-	return head;
+	return alloc_cell();
 }
 
 void push_stack(struct list *head, void *data, size_t size_data)
@@ -205,11 +201,8 @@ void delete_list(struct list *head)
 	@param head リストの先頭
 */
 {
-	struct list *target;
-
 	while (head->prev != head) {
-		target = head->prev;
-		delete_cell(target);
+		delete_cell(head->prev);
 	}
 	delete_cell(head);
 }
